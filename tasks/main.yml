@@ -1,0 +1,60 @@
+- name: Validate Server is Reachable
+  ping:
+
+- name: Capture current username
+  command: whoami
+  register: current_username
+
+- name: Print current username
+  debug:
+    msg: Current user is {{ current_username.stdout }}
+
+- name: Validate HTTPd is Active
+  service:
+    name: httpd
+    state: started
+
+- name: Validate TomCat is Active
+  service:
+    name: tomcat
+    state: started
+
+- name: Get PID of Tomcat instance
+  shell: "ps aux|grep {{ tomcat_instance_name }}|grep -v grep|awk '{ print $2 }'"
+  register: pid_of_tomcat
+
+- name: Printing the process IDs obtained
+  debug:
+    msg: "PID of Tomcat: {{ pid_of_tomcat.stdout }}"
+
+- name: Save Tomcat PID
+  set_fact: tomcat_pid={{ pid_of_tomcat.stdout }}
+
+# - name: Stop Tomcat service
+#   command: "sh {{ tomcat_install_dir }}/bin/shutdown.sh"
+#   args:
+#     chdir: "{{ tomcat_install_dir }}/bin/"
+
+- name: Stop TomCat Service
+  service:
+    name: tomcat
+    state: stopped
+  register: tomcat_stop
+
+# - name: Wait till Tomcat is down
+#   wait_for:
+#     path: /proc/{{ tomcat_pid }}/status
+#     state: absent
+#     timeout: 60
+#   ignore_errors: yes
+#   register: wait_for_tomcatshutdown
+
+- name: Force killing stuck Tomcat processes
+  shell: "kill -9 {{ tomcat_pid }}"
+  when: tomcat_stop.failed
+
+- name: Download latest WAR from Artifactory
+  get_url:
+    url: "{{ artifactory_base_url }}/"
+    dest: "{{ default_document_root }}"
+    # backup: yes
