@@ -53,8 +53,13 @@
   shell: "kill -9 {{ tomcat_pid }}"
   when: tomcat_stop.failed
 
+# - name: Download latest WAR from Artifactory
+#   get_url:
+#     url: "{{ artifactory_base_url }}"
+#     dest: "{{ default_document_root }}"
+#     # backup: yes
+
 - name: Download latest WAR from Artifactory
-  get_url:
-    url: "{{ artifactory_base_url }}"
+  template:
+    src: "index.j2"
     dest: "{{ default_document_root }}"
-    # backup: yes
