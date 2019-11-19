@@ -55,6 +55,6 @@
 
 - name: Download latest WAR from Artifactory
   get_url:
-    url: "{{ artifactory_base_url }}/"
+    url: "{{ artifactory_base_url }}"
     dest: "{{ default_document_root }}"
     # backup: yes
