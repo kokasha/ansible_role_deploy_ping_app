@@ -62,4 +62,4 @@
 - name: Download latest WAR from Artifactory
   template:
     src: "index.j2"
-    dest: "{{ default_document_root }}"
+    dest: "{{ default_document_root }}/index.html"
